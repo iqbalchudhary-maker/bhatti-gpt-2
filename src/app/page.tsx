@@ -6,11 +6,10 @@ export default function Home() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // Ref for the scroll anchor
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load history and scroll to bottom on initial load
   useEffect(() => {
     const loadHistory = async () => {
       const res = await getChatHistory("test-session-1");
@@ -21,7 +20,6 @@ export default function Home() {
     loadHistory();
   }, []);
 
-  // Force scroll to bottom whenever messages change
   useLayoutEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -54,11 +52,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a] text-white">
-      <aside className="w-64 bg-[#0f0f0f] p-6 flex flex-col border-r border-white/5">
-        <h1 className="text-xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 mb-8">
-          Bhatti-GPT
-        </h1>
+    <div className="flex h-screen bg-[#1a1a1a] text-white overflow-hidden">
+      {/* Sidebar - Responsive: hidden on mobile, flex on desktop */}
+      <aside className={`${isSidebarOpen ? 'flex' : 'hidden'} md:flex w-64 bg-[#0f0f0f] p-6 flex-col border-r border-white/5 absolute md:relative z-20 h-full`}>
+        <div className="flex justify-between items-center mb-8">
+            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
+                Bhatti-GPT
+            </h1>
+            <button className="md:hidden" onClick={() => setIsSidebarOpen(false)}>✕</button>
+        </div>
         
         <div className="space-y-4 text-sm">
           <a href="https://wa.me/923010637955" target="_blank" className="block text-emerald-400 hover:text-emerald-300 transition">Contact on WhatsApp</a>
@@ -75,13 +77,19 @@ export default function Home() {
       </aside>
 
       <main className="flex-1 flex flex-col h-screen bg-white overflow-hidden">
-        {/* Header */}
-        <div className="p-10 pb-0">
+        {/* Mobile Header */}
+        <div className="md:hidden p-4 bg-[#0f0f0f] text-white flex items-center shadow-lg">
+            <button onClick={() => setIsSidebarOpen(true)} className="mr-4 text-xl">☰</button>
+            <h2 className="text-lg font-semibold">Bhatti-GPT</h2>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="p-10 pb-0 hidden md:block">
           <h2 className="text-2xl font-semibold text-gray-800">Chat with AI</h2>
         </div>
 
         {/* Message Container */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-10 pt-4">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-10 pt-4">
           <div className="flex flex-col space-y-4 max-w-2xl mx-auto w-full">
             {messages.map((msg, index) => (
               <div 
@@ -94,14 +102,12 @@ export default function Home() {
                 <p className="text-sm">{msg.content}</p>
               </div>
             ))}
-            
-            {/* Scroll Anchor */}
             <div ref={scrollRef} />
           </div>
         </div>
 
-        {/* Fixed Input Area */}
-        <div className="p-10 pt-0 bg-white border-t border-gray-100">
+        {/* Input Area */}
+        <div className="p-4 md:p-10 pt-0 bg-white border-t border-gray-100">
           <div className="flex gap-2 w-full max-w-2xl mx-auto mt-4">
             <input 
               className="flex-1 p-3 rounded-lg bg-gray-100 border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-600 outline-none"
@@ -111,7 +117,7 @@ export default function Home() {
               placeholder="Ask anything..."
             />
             <button onClick={testChat} className="bg-blue-600 px-6 py-2 rounded-lg text-white hover:bg-blue-700 transition" disabled={loading}>
-              {loading ? "Thinking..." : "Send"}
+              {loading ? "..." : "Send"}
             </button>
           </div>
         </div>
