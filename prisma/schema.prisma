@@ -1,0 +1,28 @@
+// 1. Batana hai ke database konsa hai aur URL kahan hai
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 2. Batana hai ke Prisma Client kaise generate hoga
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 3. Aapke Models (Tables)
+model Message {
+  id             String   @id @default(cuid())
+  sessionId      String   
+  role           String   // 'user' ya 'model'
+  content        String   @db.Text 
+  createdAt      DateTime @default(now())
+
+  @@index([sessionId]) 
+}
+
+model Knowledge {
+  id        String   @id @default(cuid())
+  fileName  String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
